@@ -10,25 +10,14 @@ using UnityEngine;
 
 public class TextEffectManager : MonoBehaviour
 {
-    public abstract class GameTagPair
-    {
-        public string start;
-        public string end;
-        public virtual GameTagPair Do(string targetText)
-        {
-            //functions
-            return this;
-        }
-    }
-    
     public enum Tags
     {
         Default,
-        tag1,
-        tag2,
+        Delete,
+        GirlName,
     }
     public string a = "<she starts <tag1>to behavior in </tag1>a pretty wired <tag2>way. However, other people are</tag2> apparently not realizing this.";
-
+    public string girlName;
 
     void Start()
     {
@@ -39,28 +28,27 @@ public class TextEffectManager : MonoBehaviour
     public string ProcessingTags(string sentence)
     {
         var splitSentenceList = Regex.Split(sentence, @"(?=[<])|(?<=[>])").ToList();
-        _PrintString(splitSentenceList);
-        var hasTag = true;
-        while (_GetPairTag(splitSentenceList,out KeyValuePair<Tags,int> startTag, out KeyValuePair<Tags,int> endTag))
+        while (_GetPairTag(splitSentenceList,out KeyValuePair<Tags,string> startTag, out KeyValuePair<Tags,string> endTag))
         {
-            splitSentenceList = _DoTagBehavior(startTag, endTag, splitSentenceList);
+            splitSentenceList = _DoTagBehaviorAndCleanTag(startTag, endTag, splitSentenceList);
+            //_PrintString(splitSentenceList);
         }
         return _ListToString(splitSentenceList);
     }
 
 
-    private bool _GetPairTag(List<string> stringList,out KeyValuePair<Tags,int> startTag, out KeyValuePair<Tags,int> endTag)
+    private bool _GetPairTag(List<string> stringList,out KeyValuePair<Tags,string> startTag, out KeyValuePair<Tags,string> endTag)
     {
         for (int i = 0; i < stringList.Count; i++)
         {
             if (_GetActiveTag(stringList[i], out bool isStart,out Tags tagType) == Tags.Default) continue;
             if (isStart)
             {
-                startTag = new KeyValuePair<Tags, int>(tagType,i);
+                startTag = new KeyValuePair<Tags, string>(tagType,stringList[i]);
                 continue;
             }
             //is end
-            endTag = new KeyValuePair<Tags, int>(tagType,i);
+            endTag = new KeyValuePair<Tags, string>(tagType,stringList[i]);
             Debug.Assert(endTag.Key == startTag.Key,"tag "+ endTag.Key + "overlay with tag " + startTag.Key);
             return true;
         }
@@ -70,7 +58,7 @@ public class TextEffectManager : MonoBehaviour
     private Tags _GetActiveTag(string testString, out bool isStart, out Tags tagType)
     {
         isStart = false;
-        tagType = default;
+        tagType = Tags.Default;
         
         if (!testString.StartsWith("<") || !testString.EndsWith(">")) return Tags.Default;
         
@@ -85,6 +73,26 @@ public class TextEffectManager : MonoBehaviour
         
         return Enum.TryParse<Tags>(tagStr, out tagType)? tagType : Tags.Default;
     }
+    private List<string> _DoTagBehaviorAndCleanTag(KeyValuePair<Tags,string> startTag, KeyValuePair<Tags,string> endTag, List<string> operateString)
+    {
+        var startPos = operateString.IndexOf(startTag.Value);
+        var endPos = operateString.IndexOf(endTag.Value);
+        switch (startTag.Key)
+        {
+            case Tags.Delete:
+                for (int i = startPos + 1; i < endPos; i++) operateString[i] = "";
+                break;
+            case Tags.GirlName:
+                for (int i = startPos + 2; i < endPos; i++) operateString[i] = "";
+                operateString[startPos + 1] = girlName; 
+                break;
+        }
+
+        operateString.Remove(startTag.Value);
+        operateString.Remove(endTag.Value);
+        
+        return operateString;
+    }
     private void _PrintString(IEnumerable b)
     {
         foreach (var sentence in b)
@@ -92,23 +100,11 @@ public class TextEffectManager : MonoBehaviour
             Debug.Log(sentence);
         }
     }
-
-    private List<string> _DoTagBehavior(KeyValuePair<Tags,int> startTag, KeyValuePair<Tags,int> endTag, List<string> operateString)
-    {
-        switch (startTag.Key)
-        {
-            case Tags.tag1:
-                break;
-            case Tags.tag2:
-                break;
-        }
-        return operateString;
-    }
-    private string _ListToString(IEnumerable list)
+    private string _ListToString(List<string> list)
     {
         var str = "";
         foreach (var item in list)
-            str += list;
+            str += item;
         return str;
     }
 }
