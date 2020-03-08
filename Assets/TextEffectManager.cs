@@ -7,15 +7,23 @@ using UnityEngine;
 
 public class TextEffectManager : MonoBehaviour
 {
+    public abstract class GameTagPair
+    {
+        public string start;
+        public string end;
+        public virtual GameTagPair Do(string targetText)
+        {
+            //functions
+            return this;
+        }
+    }
     public enum Tags
     {
-        
+        Default,
+        tag1,
     }
     public string a = "<she starts <tag1>to behavior in </tag1>a pretty wired <tag2>way. However, other people are</tag2> apparently not realizing this.";
-    // Start is called before the first frame update
-    public TextEffectManager()
-    {
-    }
+
 
     void Start()
     {
@@ -23,20 +31,30 @@ public class TextEffectManager : MonoBehaviour
         GetTags(a, out str);
     }
 
-    // Update is called once per frame
     public List<Tags> GetTags(string sentence, out string cleanSentence)
     {
-        var wordList = sentence.Split("<"[0],">"[0]).ToList();
-        var match = Regex.Matches(a, "[<->]");
-        for (int i = 1; i < wordList.Count; i++)
+        var splitSentenceList = Regex.Split(sentence, @"(?=[<])|(?<=[>])");
+        _PrintString(splitSentenceList);
+        var hasTag = true;
+        while (hasTag)
         {
-            //wordList[i] = "<" + wordList[i];
+            var targetTag
         }
-        _PrintString(match);
+        foreach (var parameter in splitSentenceList)
+        {
+            if(_GetActiveTag(parameter) != Tags.Default) 
+        }
+        Debug.Log(_GetActiveTag("<tag1>"));
         cleanSentence = "";
         return new List<Tags>();
     }
 
+    private Tags _GetActiveTag(string testString)
+    {
+        if (!testString.StartsWith("<") || !testString.EndsWith(">")) return Tags.Default;
+        var tagStr = testString.Substring(1, testString.Length - 2).Trim();
+        return Enum.TryParse<Tags>(tagStr, out Tags parseTag)? parseTag : Tags.Default;
+    }
     private void _PrintString(IEnumerable b)
     {
         foreach (var sentence in b)
