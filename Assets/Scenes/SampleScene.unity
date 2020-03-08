@@ -159,8 +159,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acfdaf7466493db49aed73d8c88ce380, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  a: <GirlName>she</GirlName> starts to behavior in a pretty <Delete>wired </Delete>way.
-    However, other people are apparently not realizing this.
+  a: <GirlName>she</GirlName> starts to behavior in a pretty <Delete match="i">wired
+    </Delete>way. However, other people are apparently not realizing this.
   girlName: Mary
 --- !u!20 &519420031
 Camera:
